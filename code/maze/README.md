@@ -1,0 +1,172 @@
+# MetaFlow - Maze with Teleports
+
+Same DQN-based pipeline as the other discrete envs, run on
+maze-random-10x10-plus-v0 (the "plus" mazes in gym-maze are the ones with
+portals/teleports, which is what the paper's "Maze with Teleports" refers
+to).
+
+## Extra setup: gym-maze
+
+Not a PyPI package, install it separately:
+
+```
+pip install git+https://github.com/MattChanTK/gym-maze
+```
+
+## Folder layout
+
+```
+maze/
+  cleanrl/                 (keep this name, imports depend on it)
+    pyproject.toml, poetry.lock
+    cleanrl/                pipeline scripts
+      dqn2.py
+      q_online.py
+      data3.py
+      sf_maml.py
+      task2.py
+      dqn.py
+      dqntest.py
+    diayn/                  shared code used by the scripts above
+      models.py
+      utils.py
+      evaluate_diayn.py
+  pretrained/              small checkpoints for the quick-start below
+```
+
+## Quick start: reproduce the result without running the full pipeline
+
+This folder includes a `pretrained/` directory with the two small checkpoint
+files needed for the last pipeline step - the meta-learned successor-feature
+network (`pretrained/maml/latest.pth`, from step 5) and the fitted task
+vector `w` (`pretrained/env_phi_task/latest.pth`, from step 7). Together
+they're under 100KB. Skip steps 1-7 entirely and just run:
+
+```
+cd cleanrl
+poetry install
+source "$(poetry env list --full-path)/bin/activate"
+cd ..
+python -m cleanrl.cleanrl.dqntest \
+    --env-id maze-random-10x10-plus-v0 \
+    --model-path pretrained/maml/latest.pth \
+    --w-path pretrained/env_phi_task/latest.pth
+```
+
+This reproduces the same MetaFlow trend reported in the paper for this
+environment. If you want to see how those two files are actually produced,
+or reproduce the whole pipeline from scratch, follow the steps below.
+
+## Setup
+
+```
+cd cleanrl
+poetry install
+source "$(poetry env list --full-path)/bin/activate"
+pip install git+https://github.com/MattChanTK/gym-maze
+cd ..
+```
+
+This activates the virtual environment poetry just created, so the `python`
+you run from here on is the right one with everything installed. If you open
+a new terminal later, just re-run the `source` line (no need to `poetry
+install` again).
+
+## Running it
+
+One thing before you start: every script here logs to Weights & Biases by default (`track` defaults to `True`). Either run `wandb login` once (free account, one-time), or add `--no-track` to any command below to skip cloud logging - everything still gets written to TensorBoard logs under `runs/` either way.
+
+Run everything from the `maze` folder (one level above `cleanrl/`), using
+`python -m`. Checkpoints and data land under `runs/`, each script prints
+where it saved to.
+
+### 1. Train DIAYN
+
+```
+python -m cleanrl.cleanrl.dqn2 --env-id maze-random-10x10-plus-v0
+```
+
+### 2. Watch the skills, pick the ones you want
+
+```
+python -m cleanrl.diayn.evaluate_diayn \
+    --env-id maze-random-10x10-plus-v0 \
+    --model-path runs/checkpoints/diayn/<run_from_step_1>/latest.pth
+```
+
+Go through the per-skill videos, note down 6 skills that look off from a
+normal shortest-path-to-goal policy.
+
+### 3. Train the per-skill Q-functions (`q_online`)
+
+The 6 skill indices from step 2 go into `allowed_skills` in three places:
+`cleanrl/q_online.py`, `cleanrl/data3.py` (step 4), and `cleanrl/sf_maml.py`
+(step 5). Update all three to match before running anything.
+
+```
+python -m cleanrl.cleanrl.q_online \
+    --env-id maze-random-10x10-plus-v0 \
+    --disc-path runs/checkpoints/diayn/<run_from_step_1>/latest.pth
+```
+
+### 4. Generate data for meta-training (`data3`)
+
+```
+python -m cleanrl.cleanrl.data3 \
+    --env-id maze-random-10x10-plus-v0 \
+    --model-path-disc runs/checkpoints/diayn/<run_from_step_1>/latest.pth \
+    --model-path-qnet runs/checkpoints/qtargetmaml/<run_from_step_3>/latest.pth
+```
+
+### 5. Meta-learn the successor features (`sf_maml`)
+
+```
+python -m cleanrl.cleanrl.sf_maml \
+    --env-id maze-random-10x10-plus-v0 \
+    --data-path runs/data/<run_from_step_4>/maml_training_data.pkl \
+    --disc-path runs/checkpoints/qtargetmaml/<run_from_step_3>/latest.pth \
+    --qnet-path runs/checkpoints/qtargetmaml/<run_from_step_3>/latest.pth
+```
+
+### 6. Generate data for the downstream task
+
+`dqn.py` can dump the data task2.py needs, but the lines that do it are
+commented out by default. Look for the block near the end of the training
+loop (search for `reward_data`), uncomment it, run:
+
+```
+python -m cleanrl.cleanrl.dqn --env-id maze-random-10x10-plus-v0
+```
+
+comment it back out once it's done.
+
+### 7. Fit the task vector `w` (`task2`)
+
+```
+python -m cleanrl.cleanrl.task2 \
+    --env-id maze-random-10x10-plus-v0 \
+    --env-data-path runs/data/<run_from_step_6>/task_regression_data.pkl \
+    --model-path2 runs/checkpoints/maml/<run_from_step_5>/latest.pth \
+    --qnet-path runs/checkpoints/qtargetmaml/<run_from_step_3>/latest.pth
+```
+
+### 8. Downstream adaptation (`dqntest`)
+
+```
+python -m cleanrl.cleanrl.dqntest \
+    --env-id maze-random-10x10-plus-v0 \
+    --model-path runs/checkpoints/maml/<run_from_step_5>/latest.pth \
+    --w-path runs/checkpoints/env_phi_task/<run_from_step_7>/latest.pth
+```
+
+`--no-pretrained` runs it as the Base comparison instead.
+
+## A few things worth knowing
+
+- No checkpoints included, just code.
+- `sf_maml.py`'s `n_actions` is 4 (up, down, left, right).
+- `q_online.py` was missing the discriminator loading entirely - same issue
+  as it was for CartPole and WindyGrid, restored here the same way.
+- `dqn2.py`, `data3.py`, and `evaluate_diayn.py` were missing the
+  `import gym_maze` that the other scripts have (needed to register the
+  maze environment) - added here.
