@@ -152,6 +152,5 @@ python -m cleanrl.cleanrl.dqntest \
 
 ## A few things worth knowing
 
-- No checkpoints included, just code.
 - `sf_maml.py`'s `n_actions` is 3 (Acrobot has 3 discrete actions - apply
   negative torque, no torque, or positive torque).

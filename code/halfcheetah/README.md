@@ -202,12 +202,6 @@ loading in this script is commented out and doesn't affect the run.
 
 ## A few things worth knowing
 
-- These are the current versions of the scripts, not necessarily byte-for-byte
-  what produced the numbers in the paper (this project went through a lot of
-  iterations across environments and some files got edited after the
-  HalfCheetah run). The pipeline and logic are the same though.
-- No checkpoints are included here, just code. You'll regenerate everything
-  by running the steps above.
-- `sf_dim` (32) and `n_skills_selected`/`n_skills_total` (6/25) are used the
-  same way across all environments in the paper. Everything else can be
-  tuned per environment through the command line flags.
+- `sf_dim` (32) and `n_skills_selected`/`n_skills_total` (6/25) are the same
+  across all environments. Everything else can be tuned per environment
+  through the command line flags.

@@ -152,29 +152,7 @@ python -m cleanrl.cleanrl.dqntest \
 
 `--no-pretrained` runs it as the Base comparison instead.
 
-## LunarLander is actually the first environment in this whole project
+## A few things worth knowing
 
-Worth knowing, since it explains a couple of things below: the checkpoints
-this pipeline originally produced go back to April 2025, before any of the
-other environments (and their per-environment git branches) existed. So a
-couple of the fixes below work a bit differently than they did for CartPole.
-
-## Two things fixed here
-
-- `q_online.py` was missing the discriminator loading entirely, same as it
-  was for CartPole - it created a fresh, untrained discriminator and used
-  it to compute the training reward, which isn't useful. This one goes back
-  to the original LunarLander run too, it was never wired up here. Restored
-  the loading code (found on the `cart-pole`/`acrobot` git branches, which
-  had it working) and added the `pretrained`/`disc_path` args it needs.
-- `data3.py` had its discriminator-loading line commented out. Unlike
-  `q_online.py`, this one actually worked correctly the first time around -
-  the original LunarLander run had this line active and loading a real
-  checkpoint. It got commented out later, for a different environment.
-  Uncommented it back here, so it matches what LunarLander originally ran.
-
-## A few other things worth knowing
-
-- No checkpoints included, just code.
 - `sf_maml.py`'s `n_actions` is 4 (LunarLander has 4 discrete actions - do
   nothing, fire left engine, fire main engine, fire right engine).

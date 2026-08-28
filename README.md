@@ -8,7 +8,7 @@ Diverse Tasks" (MetaFlow).
   commands, nothing shared between folders. Pick the environment you care
   about and just use that folder.
 - `Training Tasks videos/` - example clips of the training-task behaviors
-  (the misaligned skills DIAYN discovers) referenced in the paper.
+  referenced in the paper.
 
 ## Environments
 
@@ -23,20 +23,10 @@ Diverse Tasks" (MetaFlow).
 | `code/windygrid/` | WindyGridWorld-v0 | discrete, grid world |
 | `code/maze/` | maze-random-10x10-plus-v0 | discrete, grid world |
 
-Each folder's README walks through regenerating everything from scratch. We
-don't include the full pipeline's checkpoints (some of the intermediate
-data files run into hundreds of MB per environment), but each folder does
-include a small `pretrained/` directory - just the two files needed to run
-the final downstream step directly and reproduce the reported trend,
-together under 100KB per environment. See "Quick start" near the top of
-each folder's own README.
-
-For HalfCheetah, these are an exact match to what actually produced the
-number in the paper. For the others, they're the checkpoints closest in
-time to the officially reported run (in several cases, confirmed by the
-scripts' own hardcoded default paths pointing at exactly these files) - very
-likely exact, but not guaranteed byte-for-byte in every case. Either way
-they reproduce the same MetaFlow behavior reported in the paper.
+Each folder's README walks through regenerating everything from scratch.
+Each folder also includes a small `pretrained/` directory with the two
+files needed to run the final step directly and reproduce the reported
+result. See "Quick start" near the top of each folder's own README.
 
 ## The pipeline, in short
 
@@ -109,8 +99,8 @@ independent projects, not linked to each other).
 
 ### Two environments need one extra package
 
-`code/windygrid/` and `code/maze/` use environments that aren't on PyPI -
-they're installed straight from GitHub, after the steps above:
+`code/windygrid/` and `code/maze/` use environments that aren't on PyPI - they're
+installed straight from GitHub, after the steps above:
 ```
 # windygrid only
 pip install git+https://github.com/ibrahim-elshar/gym-windy-gridworlds

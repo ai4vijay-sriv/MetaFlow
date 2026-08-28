@@ -167,28 +167,7 @@ it as the Base comparison instead.
 used for the CartPole number in the paper, so leave it unless you're
 deliberately sweeping it.
 
-## Two bugs fixed here, worth knowing about
+## A few things worth knowing
 
-While pulling these files together, two of them turned out to be broken in
-ways that go beyond just stale checkpoint paths - this project has a bunch
-of per-environment git branches, and these two scripts had gotten edited
-for a different environment at some point without carrying the fix back:
-
-- `q_online.py` was missing the discriminator loading entirely - it created
-  a fresh, untrained discriminator and used it to compute the DIAYN reward
-  during training, which doesn't do anything useful. Restored the loading
-  code (found on the `cart-pole` git branch, which still had it working) and
-  added the `pretrained`/`disc_path` args it needs.
-- `data3.py` had its discriminator-loading line commented out, same issue -
-  it uses the discriminator afterward to label the collected data by skill
-  and pull the per-skill reward-weight vector, so it needs to actually be
-  loaded. Uncommented it.
-
-Both are fixed in the copies here.
-
-## A few other things worth knowing
-
-- No checkpoints included, just code.
 - `sf_maml.py`'s `n_actions` is 2 (CartPole has 2 discrete actions - left,
-  right), different from the continuous envs where `n_actions` was the
-  action dimensionality.
+  right).

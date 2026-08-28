@@ -166,12 +166,4 @@ python -m cleanrl.cleanrl.dqntest \
 
 ## A few things worth knowing
 
-- No checkpoints included, just code.
 - `sf_maml.py`'s `n_actions` is 4 (up, down, left, right).
-- These files came from a separate checkout that had been reused across a
-  couple of different environments, so a few things needed straightening
-  out to make this folder self-contained and consistent with the others:
-  the internal imports were pointing at a different package name than the
-  rest of this project uses, and `dqn2.py`/`evaluate_diayn.py` were missing
-  the import that registers the WindyGrid environment (the other five
-  scripts had it). Both are fixed here.

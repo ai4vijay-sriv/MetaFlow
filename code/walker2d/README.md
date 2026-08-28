@@ -161,8 +161,5 @@ args but unused.
 
 ## A few things worth knowing
 
-- Same as the other two: these are the current versions of the scripts, not
-  necessarily byte-for-byte what produced the paper numbers, but same logic.
-- No checkpoints included, just code.
-- Walker2d's action space is 6-dimensional, same as HalfCheetah
-  (`n_actions = 6` in sf_maml_cont.py).
+- Walker2d's action space is 6-dimensional (`n_actions = 6` in
+  sf_maml_cont.py).

@@ -163,10 +163,4 @@ python -m cleanrl.cleanrl.dqntest \
 
 ## A few things worth knowing
 
-- No checkpoints included, just code.
 - `sf_maml.py`'s `n_actions` is 4 (up, down, left, right).
-- `q_online.py` was missing the discriminator loading entirely - same issue
-  as it was for CartPole and WindyGrid, restored here the same way.
-- `dqn2.py`, `data3.py`, and `evaluate_diayn.py` were missing the
-  `import gym_maze` that the other scripts have (needed to register the
-  maze environment) - added here.

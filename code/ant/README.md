@@ -164,11 +164,4 @@ HalfCheetah.
 
 ## A few things worth knowing
 
-- Same as HalfCheetah: these are the current versions of the scripts, not
-  necessarily byte-for-byte what produced the paper numbers, but same logic.
-- No checkpoints included, just code.
-- Ant's action space is 8-dimensional (`n_actions = 8` in sf_maml_cont.py),
-  vs HalfCheetah's 6.
-- There's also a `ddpgtesting19_bigsf.py` in the original project (bigger
-  successor feature network, a separate ablation) - not used for the Ant
-  number reported in the paper, so it's not included here.
+- Ant's action space is 8-dimensional (`n_actions = 8` in sf_maml_cont.py).
